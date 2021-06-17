@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 
+import Config from '../../managers/config';
 import Status from '../common/status';
 import Loading from '../common/loading';
 
@@ -53,8 +54,9 @@ class Search extends React.Component {
   search(params) {
     // REFACTOR:SETUP_CONFIGURATIONS
     // Shouldn't be hardcoded, either setup to submit to self or make configurable
-    // Short cutting to get a proof of concept
-    return axios.get('http://localhost:8000/api/listings', {
+    // Also entities would be better suited in a front end service for get/posting
+    // data back and forth from the server, short cutting to get a proof of concept
+    return axios.get(Config.backend + '/api/listings', {
       params: params
     })
       .then((response) => {
