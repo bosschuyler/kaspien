@@ -1,6 +1,10 @@
 @import '~bootstrap/scss/bootstrap.scss';
 
 
+.btn-spaced {
+    margin: .25rem .25rem .25rem 0;
+}
+
 .spin {
     animation: spin 2s linear infinite;
 }
