@@ -2,10 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 class Notice extends React.Component {
-  constructor(props, context) {
-    super(props, context);
-  }
-
   render() {
     const { title, type, messages, validations } = this.props;
     
@@ -20,11 +16,11 @@ class Notice extends React.Component {
     }
 
     let classes = 'alert';
-    if (type == 'danger') {
+    if (type === 'danger') {
         classes += ' alert-danger';
-    } else if (type == 'success') {
+    } else if (type === 'success') {
         classes += ' alert-success';
-    } else if (type == 'warning') {
+    } else if (type === 'warning') {
         classes += ' alert-warning';
     }
 
