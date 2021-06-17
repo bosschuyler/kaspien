@@ -5,6 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 import Notice from '../common/notice';
 import Loading from '../common/loading';
+import Config from '../../managers/config';
 import { catchErrors, getBody } from '../../managers/request';
 
 const validMimeTypes = ['text/csv'];
@@ -116,8 +117,9 @@ class UploadForm extends React.Component {
 
     // REFACTOR:SETUP_CONFIGURATIONS
     // Shouldn't be hardcoded, either setup to submit to self or make configurable
-    // Short cutting to get a proof of concept
-    axios.post('http://localhost:8000/api/listings/upload', formData)
+    // Also entities would be better suited in a front end service for get/posting
+    // data back and forth from the server, short cutting to get a proof of concept
+    axios.post(Config.backend + '/api/listings/upload', formData)
       .then(getBody)
       .catch(catchErrors)
       .then((response) => {
