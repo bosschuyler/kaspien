@@ -35,7 +35,7 @@ class ListingController extends Controller
             $from = $total > $per_page ? $per_page * ($page - 1) + 1 : 1;
             $to = $paginator->count() + ($from - 1);
             return [
-                'items' => $paginator->getCollection(),
+                'records' => $paginator->getCollection(),
                 'page' => $paginator->currentPage(),
                 'per_page' => $per_page,
                 'from' => $from,
@@ -47,7 +47,7 @@ class ListingController extends Controller
             $records = $query->get();
             $total = $records->count();
             return [
-                'items' => $records,
+                'records' => $records,
                 'current_page' => 1,
                 'per_page' => $total,
                 'from' => 1,
@@ -122,6 +122,8 @@ class ListingController extends Controller
                 if ($existing->get($listing->asin)) {
                     $listings->forget($pos);
                     $found++;
+                } else {
+                    $listing->touch();
                 }
             }
 
