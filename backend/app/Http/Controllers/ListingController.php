@@ -93,13 +93,14 @@ class ListingController extends Controller
                 // otherwise the row is missing data/has extra data and we should skip/log
                 if (count($row) != count($column_map)) {
                     $errors[] = ['row'=> $i, 'message'=>"Row #{$i} doesn't have enough columns"];
+                    continue;
                 }
 
                 // Map to an associative array based on the column mapping to fit the model
                 // attribute requirements for mass assignment
                 $keyed_row = [];
                 foreach ($column_map as $column_num=>$key) {
-                    $keyed_row[$key] = $row[$column_num];
+                    $keyed_row[$key] = $row[$column_num] ?? null;
                 }
 
                 // Using the model we can validate the row and extract error messages for possible
@@ -118,17 +119,21 @@ class ListingController extends Controller
             // but would likely want to dispatch onto a job with a monitor as inserts are less expensive to perform
             $asins = $listings->pluck('asin');
             $existing = Listing::whereIn('asin', $asins->all())->get()->keyBy('asin');
+            $inserts = [];
             foreach ($listings as $pos=>$listing) {
                 if ($existing->get($listing->asin)) {
                     $listings->forget($pos);
                     $found++;
                 } else {
-                    $listing->touch();
+                    $inserts[] = array_merge($listing->getAttributes(), [
+                        'created_at' => \Carbon\Carbon::now(),
+                        'updated_at' => \Carbon\Carbon::now()
+                    ]);
                 }
             }
 
-            if ($listings->count()) {
-                $inserted = Listing::insert($listings->toArray());
+            if ($inserts) {
+                $inserted = Listing::insert($inserts);
             }
 
             // If some listings inserted or we have valid existing records, we can count as a success with warnings, 
