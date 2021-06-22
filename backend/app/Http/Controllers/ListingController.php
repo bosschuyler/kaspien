@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -27,8 +29,8 @@ class ListingController extends Controller
         $page = $request->input('page', 1);
 
         $query = Listing::query();
-
         // To-Do... Add potential filtering criteria
+        
         if ($per_page) {
             $paginator = $query->paginate($per_page, ['*'], 'page', $page);
             $total = $paginator->total();
@@ -89,6 +91,11 @@ class ListingController extends Controller
             $path = $csv_file->getRealPath();
             $table = array_map('str_getcsv', file($path));
             foreach ($table as $i => $row) {
+                // Skip the header
+                if ($i === 0) {
+                    continue;
+                }
+
                 // Ensure each row has a matching number of columns to the column_map
                 // otherwise the row is missing data/has extra data and we should skip/log
                 if (count($row) != count($column_map)) {
@@ -100,7 +107,9 @@ class ListingController extends Controller
                 // attribute requirements for mass assignment
                 $keyed_row = [];
                 foreach ($column_map as $column_num=>$key) {
-                    $keyed_row[$key] = $row[$column_num] ?? null;
+                    // Remove hidden characters due to encodings that prefix data leading to mismatched database values
+                    // that should identical
+                    $keyed_row[$key] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $row[$column_num]) ?? null;
                 }
 
                 // Using the model we can validate the row and extract error messages for possible
@@ -122,12 +131,11 @@ class ListingController extends Controller
             $inserts = [];
             foreach ($listings as $pos=>$listing) {
                 if ($existing->get($listing->asin)) {
-                    $listings->forget($pos);
                     $found++;
                 } else {
                     $inserts[] = array_merge($listing->getAttributes(), [
-                        'created_at' => \Carbon\Carbon::now(),
-                        'updated_at' => \Carbon\Carbon::now()
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
                     ]);
                 }
             }
